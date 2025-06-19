@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Loaning an item"
+        android:textSize="50sp"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- What are you loaning? -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="What are you loaning?"
+        android:gravity="center" />
+    <EditText
+        android:id="@+id/etItem"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter item name"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Who are you loaning it to? -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Who are you loaning it to?"
+        android:gravity="center" />
+    <EditText
+        android:id="@+id/etBorrower"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter borrower name"
+        android:gravity="center"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Set a return date? -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Set a return date?"
+        android:gravity="center" />
+
+    <!-- Container for Calendar Button and Date Layout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="16dp">
+
+        <!-- Calendar Button (visible initially) -->
+        <Button
+            android:id="@+id/btnCalendar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Choose Date"
+            android:visibility="visible" />
+
+        <!-- Date and Delete Button (hidden initially) -->
+        <LinearLayout
+            android:id="@+id/dateLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tvDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:layout_marginEnd="16dp" />
+
+            <Button
+                android:id="@+id/btnDeleteDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Take a picture? -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Take a picture?"
+        android:gravity="center" />
+
+    <!-- Container for Camera Button and Photo Layout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="16dp">
+
+        <!-- Camera Button (visible initially) -->
+        <Button
+            android:id="@+id/btnCamera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Take Photo"
+            android:visibility="visible" />
+
+        <!-- Image and Delete Button (hidden initially) -->
+        <LinearLayout
+            android:id="@+id/photoLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:gravity="center">
+
+            <ImageView
+                android:id="@+id/ivPhoto"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:scaleType="fitCenter"
+                android:contentDescription="Taken Photo"
+                android:layout_marginEnd="16dp" />
+
+            <Button
+                android:id="@+id/btnDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Delete" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- LOAN Button -->
+    <Button
+        android:id="@+id/btnLoanSubmit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="LOAN"
+        android:textSize="18sp"
+        android:gravity="center"
+        android:layout_marginTop="16dp" />
+</LinearLayout>

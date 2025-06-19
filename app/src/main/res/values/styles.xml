@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme from themes.xml -->
+    <style name="Base.Theme.BorrowBuddy" parent="Theme.Material3.DayNight.NoActionBar">
+        <!-- Customize your light theme here -->
+        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+    </style>
+
+    <!-- Application theme inheriting from Base, can be customized further -->
+    <style name="Theme.BorrowBuddy" parent="Base.Theme.BorrowBuddy">
+        <!-- No additional customizations needed unless specified -->
+    </style>
+
+    <!-- Full-screen theme for the app -->
+    <style name="Theme.BorrowBuddy.FullScreen" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+</resources>
