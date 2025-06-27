@@ -11,7 +11,10 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import android.app.DatePickerDialog
 import java.io.File
@@ -19,20 +22,18 @@ import java.io.IOException
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.FileProvider
-import com.example.borrowbuddy.DataController.addItem
-import com.example.borrowbuddy.DataController.addContact
-import com.example.borrowbuddy.DataController.addLoan
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 
 class LoanActivity : AppCompatActivity() {
 
+    private lateinit var tvTitle: TextView
     private lateinit var etItem: EditText
     private lateinit var etBorrower: EditText
+    private lateinit var etNotes: EditText
     private var returnDate: String? = null
     private var photoUri: Uri? = null
     private lateinit var takePictureLauncher: ActivityResultLauncher<Intent>
@@ -44,24 +45,65 @@ class LoanActivity : AppCompatActivity() {
     private lateinit var dateLayout: LinearLayout
     private lateinit var tvDate: TextView
     private lateinit var btnDeleteDate: Button
+    private lateinit var btnLoanSubmit: Button
+    private lateinit var scrollView: ScrollView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_loan)
 
-        etItem = findViewById(R.id.etItem)
-        etBorrower = findViewById(R.id.etBorrower)
-        btnCalendar = findViewById(R.id.btnCalendar)
-        btnCamera = findViewById(R.id.btnCamera)
-        val btnLoanSubmit = findViewById<Button>(R.id.btnLoanSubmit)
-        photoLayout = findViewById(R.id.photoLayout)
-        ivPhoto = findViewById(R.id.ivPhoto)
-        btnDelete = findViewById(R.id.btnDelete)
-        dateLayout = findViewById(R.id.dateLayout)
-        tvDate = findViewById(R.id.tvDate)
-        btnDeleteDate = findViewById(R.id.btnDeleteDate)
+        // Initialize UI elements
+        try {
+            tvTitle = findViewById(R.id.tvTitle)
+            etItem = findViewById(R.id.etItem)
+            etBorrower = findViewById(R.id.etBorrower)
+            etNotes = findViewById(R.id.etNotes)
+            btnCamera = findViewById(R.id.btnCamera)
+            btnCalendar = findViewById(R.id.btnCalendar)
+            btnLoanSubmit = findViewById(R.id.btnLoanSubmit)
+            photoLayout = findViewById(R.id.photoLayout)
+            ivPhoto = findViewById(R.id.ivPhoto)
+            btnDelete = findViewById(R.id.btnDelete)
+            dateLayout = findViewById(R.id.dateLayout)
+            tvDate = findViewById(R.id.tvDate)
+            btnDeleteDate = findViewById(R.id.btnDeleteDate)
+            scrollView = findViewById(R.id.scrollView)
+        } catch (e: Exception) {
+            Log.e("LoanActivity", "Error initializing UI elements: ${e.message}")
+            Toast.makeText(this, "Error loading UI", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
 
-        // Capitalize first character of item name as user types
+        // Ensure initial visibility
+        btnCamera.visibility = Button.VISIBLE
+        btnCalendar.visibility = Button.VISIBLE
+        photoLayout.visibility = LinearLayout.GONE
+        dateLayout.visibility = LinearLayout.GONE
+
+        takePictureLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            Log.d("LoanActivity", "Camera result: code=${result.resultCode}, data=${result.data}")
+            if (result.resultCode == RESULT_OK && photoUri != null) {
+                photoLayout.visibility = LinearLayout.VISIBLE
+                btnCamera.visibility = Button.GONE
+                ivPhoto.setImageURI(photoUri)
+                Log.d("LoanActivity", "Photo set: $photoUri")
+            } else {
+                Log.w("LoanActivity", "Camera result not OK or no photoUri")
+                photoUri = null
+            }
+        }
+
+        // Scroll to etNotes when focused
+        etNotes.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                scrollView.post {
+                    scrollView.smoothScrollTo(0, etNotes.top)
+                }
+            }
+        }
+
+        // Capitalize first character of item name
         etItem.addTextChangedListener(object : TextWatcher {
             private var isUpdating = false
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -81,24 +123,8 @@ class LoanActivity : AppCompatActivity() {
             }
         })
 
-        takePictureLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            Log.d("LoanActivity", "Result received: code=${result.resultCode}, data=${result.data}")
-            if (result.resultCode == RESULT_OK && photoUri != null) {
-                Log.d("LoanActivity", "Photo URI: $photoUri")
-                btnCamera.visibility = Button.GONE
-                photoLayout.visibility = LinearLayout.VISIBLE
-                ivPhoto.setImageURI(photoUri)
-                Log.d("LoanActivity", "Photo displayed")
-            } else {
-                Log.d("LoanActivity", "Result not OK or no photo URI, code: ${result.resultCode}")
-                photoUri = null // Reset if failed or canceled
-            }
-        }
-
         btnCalendar.setOnClickListener {
             Log.d("LoanActivity", "Calendar button clicked")
-            // Clear focus and hide keyboard
-            etBorrower.clearFocus()
             currentFocus?.let { view ->
                 val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.hideSoftInputFromWindow(view.windowToken, 0)
@@ -110,17 +136,15 @@ class LoanActivity : AppCompatActivity() {
 
             DatePickerDialog(this, { _, selectedYear, selectedMonth, selectedDay ->
                 returnDate = String.format("%02d/%02d/%d", selectedDay, selectedMonth + 1, selectedYear)
-                btnCalendar.visibility = Button.GONE
                 dateLayout.visibility = LinearLayout.VISIBLE
+                btnCalendar.visibility = Button.GONE
                 tvDate.text = returnDate
-                Log.d("LoanActivity", "Date selected: $returnDate")
+                Log.d("LoanActivity", "Date set: $returnDate")
             }, year, month, day).show()
         }
 
         btnCamera.setOnClickListener {
             Log.d("LoanActivity", "Camera button clicked")
-            // Clear focus and hide keyboard
-            etBorrower.clearFocus()
             currentFocus?.let { view ->
                 val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.hideSoftInputFromWindow(view.windowToken, 0)
@@ -129,7 +153,8 @@ class LoanActivity : AppCompatActivity() {
                 val photoFile: File? = try {
                     createImageFile()
                 } catch (ex: IOException) {
-                    Log.e("LoanActivity", "Error creating file: ${ex.message}")
+                    Log.e("LoanActivity", "Error creating image file: ${ex.message}")
+                    Toast.makeText(this, "Error accessing camera", Toast.LENGTH_SHORT).show()
                     null
                 }
                 photoFile?.also {
@@ -140,12 +165,13 @@ class LoanActivity : AppCompatActivity() {
                         Log.d("LoanActivity", "Launching camera with URI: $photoUri")
                         takePictureLauncher.launch(intent)
                     } else {
-                        Log.d("LoanActivity", "No camera app available")
+                        Log.w("LoanActivity", "No camera app available")
                         photoUri = null
+                        Toast.makeText(this, "No camera app available", Toast.LENGTH_SHORT).show()
                     }
                 }
             } else {
-                Log.d("LoanActivity", "Camera permission not granted, requesting")
+                Log.d("LoanActivity", "Requesting camera permission")
                 requestPermissions(arrayOf(android.Manifest.permission.CAMERA), 100)
             }
         }
@@ -165,33 +191,34 @@ class LoanActivity : AppCompatActivity() {
         }
 
         btnLoanSubmit.setOnClickListener {
-            val itemName = etItem.text.toString()
-            val borrowerName = etBorrower.text.toString()
+            val itemName = etItem.text.toString().trim()
+            val borrowerName = etBorrower.text.toString().trim()
+            val notes = etNotes.text.toString().trim().takeIf { it.isNotBlank() }
 
-            // Capitalize first character for storage
+            if (itemName.isEmpty() || borrowerName.isEmpty()) {
+                Log.w("LoanActivity", "Item or borrower name is empty")
+                Toast.makeText(this, "Please enter item and borrower name", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val capitalizedItemName = if (itemName.isNotEmpty()) {
                 itemName.substring(0, 1).uppercase() + itemName.substring(1)
             } else {
                 itemName
             }
 
-            // Use DataController for generic operations
-            val itemId = addItem(this, capitalizedItemName, "Description TBD", photoUri?.toString())
-            val contactId = addContact(this, borrowerName)
-            val loanId = addLoan(this, itemId, contactId, returnDate, 1) // 1 = loaned
+            val itemId = DataController.addItem(this, capitalizedItemName, "Description TBD", photoUri?.toString())
+            val contactId = DataController.addContact(this, borrowerName)
+            val loanId = DataController.addLoan(this, itemId, contactId, returnDate, 1, notes)
 
-            Log.d("LoanActivity", "Loan submitted: LoanID=$loanId, ItemID=$itemId, ContactID=$contactId, ReturnDate=$returnDate")
+            Log.d("LoanActivity", "Loan submitted: LoanID=$loanId, ItemID=$itemId, ContactID=$contactId, ReturnDate=$returnDate, Notes=$notes")
 
-            // Clear fields
-            etItem.text.clear()
-            etBorrower.text.clear()
-            returnDate = null
-            photoUri = null
-            photoLayout.visibility = LinearLayout.GONE
-            btnCamera.visibility = Button.VISIBLE
-            dateLayout.visibility = LinearLayout.GONE
-            btnCalendar.visibility = Button.VISIBLE
-
+            // Pass item and borrower names to MainActivity
+            val intent = Intent(this, MainActivity::class.java).apply {
+                putExtra("ITEM_NAME", capitalizedItemName)
+                putExtra("BORROWER_NAME", borrowerName)
+            }
+            startActivity(intent)
             finish()
         }
     }
@@ -206,13 +233,11 @@ class LoanActivity : AppCompatActivity() {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 100 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            if (intent.resolveActivity(packageManager) != null) {
-                Log.d("LoanActivity", "Permission granted, launching camera")
-                takePictureLauncher.launch(intent)
-            }
+            Log.d("LoanActivity", "Camera permission granted")
+            btnCamera.performClick()
         } else {
-            Log.d("LoanActivity", "Permission denied")
+            Log.w("LoanActivity", "Camera permission denied")
+            Toast.makeText(this, "Camera permission denied", Toast.LENGTH_SHORT).show()
         }
     }
 }

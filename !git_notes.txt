@@ -1,0 +1,34 @@
+cd C:\Code\Android\BorrowBuddy
+git add .			# Stage
+git commit -m "Changes"		# Commit
+git push			# Push to Github
+# or git push origin master
+git status
+
+
+View Commit History:
+In Android Studio: VCS > Git > Show Git Log.
+
+Or command-line:
+bash
+
+git log --oneline
+
+Shows commits (e.g., 945f74f Initial commit...).
+
+Revert to a Commit:
+Identify the commit hash (e.g., 945f74f).
+
+Reset to that version:
+bash
+
+git reset --hard 945f74f
+git push -f origin master
+
+This reverts your local and remote repo to that commit.
+
+Or in Android Studio:
+Right-click the commit in Git Log > Reset Current Branch to Here > Hard.
+
+Push: VCS > Git > Push (check --force if needed).
+

@@ -93,6 +93,7 @@ object DataController {
         val item = Item(id, name, description, photoUri)
         items.add(item)
         saveItems(context)
+        Log.d("DataController", "Item added: ID=$id, Name=$name")
         return id
     }
 
@@ -123,7 +124,7 @@ object DataController {
         return loans
     }
 
-    fun addLoan(context: Context, itemId: Int, contactId: Int, returnDate: String?, disposition: Int): Int {
+    fun addLoan(context: Context, itemId: Int, contactId: Int, returnDate: String?, disposition: Int, notes: String? = null): Int {
         val id = loans.maxOfOrNull { it.id }?.plus(1) ?: 1
         val dateLoaned = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         val formattedReturnDate = returnDate?.let {
@@ -133,13 +134,13 @@ object DataController {
                 LocalDate.parse(it, inputFormatter).format(outputFormatter)
             } catch (e: Exception) {
                 Log.e("DataController", "Error formatting returnDate: ${e.message}, Input: $it")
-                null // Return null if parsing fails
+                null
             }
         }
-        val loan = Loan(id, itemId, contactId, formattedReturnDate, disposition, dateLoaned)
+        val loan = Loan(id, itemId, contactId, formattedReturnDate, disposition, dateLoaned, notes)
         loans.add(loan)
         saveLoans(context)
-        Log.d("DataController", "Loan added: ID=$id, ItemID=$itemId, ContactID=$contactId, LoanDate=$dateLoaned, ReturnDate=$formattedReturnDate")
+        Log.d("DataController", "Loan added: ID=$id, ItemID=$itemId, ContactID=$contactId, LoanDate=$dateLoaned, ReturnDate=$formattedReturnDate, Notes=$notes")
         return id
     }
 
@@ -167,10 +168,10 @@ object DataController {
                 Log.e("DataController", "Error parsing borrows: ${e.message}")
             }
         }
-        return borrows
+        return borrows // Fixed: return borrows instead of loans
     }
 
-    fun addBorrow(context: Context, itemId: Int, contactId: Int, returnDate: String?, disposition: Int): Int {
+    fun addBorrow(context: Context, itemId: Int, contactId: Int, returnDate: String?, disposition: Int, notes: String? = null): Int {
         val id = borrows.maxOfOrNull { it.id }?.plus(1) ?: 1
         val dateBorrowed = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         val formattedReturnDate = returnDate?.let {
@@ -183,9 +184,10 @@ object DataController {
                 null
             }
         }
-        val borrow = Borrow(id, itemId, contactId, formattedReturnDate, disposition, dateBorrowed)
+        val borrow = Borrow(id, itemId, contactId, formattedReturnDate, disposition, dateBorrowed, notes)
         borrows.add(borrow)
         saveBorrows(context)
+        Log.d("DataController", "Borrow added: ID=$id, ItemID=$itemId, ContactID=$contactId, BorrowDate=$dateBorrowed, ReturnDate=$formattedReturnDate, Notes=$notes")
         return id
     }
 

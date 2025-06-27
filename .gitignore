@@ -1,15 +1,28 @@
+# Android Studio
+/.idea/
 *.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
 local.properties
+.gradle/
+build/
+
+# Generated files
+*.apk
+*.ap_
+*.aab
+
+# Native builds
+.externalNativeBuild/
+.cxx/
+
+# Local configuration
+*.keystore
+*.properties
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# Captures
+/captures

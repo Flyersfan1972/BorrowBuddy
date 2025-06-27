@@ -50,6 +50,7 @@ class WhereActivity : AppCompatActivity() {
             val ivPhoto: ImageView = itemView.findViewById(R.id.ivPhoto)
             val tvContactName: TextView = itemView.findViewById(R.id.tvContactName)
             val tvLoanDetails: TextView = itemView.findViewById(R.id.tvLoanDetails)
+            val tvNotes: TextView = itemView.findViewById(R.id.tvNotes)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -64,11 +65,19 @@ class WhereActivity : AppCompatActivity() {
             val contact = DataController.getContacts().find { it.id == loan.contactId }
 
             if (item != null && contact != null) {
-                Log.d("WhereActivity", "Loan ID: ${loan.id}, Item: ${item.name}, Contact: ${contact.name}, DateLoaned: ${loan.dateLoaned}, ReturnDate: ${loan.returnDate}")
+                Log.d("WhereActivity", "Loan ID: ${loan.id}, Item: ${item.name}, Contact: ${contact.name}, DateLoaned: ${loan.dateLoaned}, ReturnDate: ${loan.returnDate}, Notes: ${loan.notes}")
 
                 holder.tvItemName.text = item.name
                 item.photoUri?.let { uri -> holder.ivPhoto.setImageURI(Uri.parse(uri)) }
                 holder.tvContactName.text = contact.name
+
+                // Display notes if they exist
+                loan.notes?.let {
+                    holder.tvNotes.text = "Notes: $it"
+                    holder.tvNotes.visibility = View.VISIBLE
+                } ?: run {
+                    holder.tvNotes.visibility = View.GONE
+                }
 
                 val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
                 val displayFormatter = DateTimeFormatter.ofPattern("MM-dd-yy")
@@ -108,6 +117,7 @@ class WhereActivity : AppCompatActivity() {
                 holder.tvItemName.text = "Unknown Item"
                 holder.tvContactName.text = "Unknown Contact"
                 holder.tvLoanDetails.text = "Loan ID: ${loan.id}, Data missing"
+                holder.tvNotes.visibility = View.GONE
             }
         }
 

@@ -57,4 +57,14 @@
         android:gravity="center"
         android:paddingTop="8dp"
         android:paddingBottom="8dp" />
+
+    <!-- Notes display -->
+    <TextView
+        android:id="@+id/tvNotes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textColor="#000000"
+        android:paddingTop="8dp"
+        android:visibility="gone" />
 </LinearLayout>
